@@ -1,55 +1,353 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Java Pro IDE - Variables + Logs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Java Pro IDE - Console + Files</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Fira Code', monospace; 
+            background: linear-gradient(145deg, #0d1117 0%, #1a1b26 100%); 
+            color: #c9d1d9; height: 100vh; overflow: hidden;
+        }
+        .topbar { 
+            background: rgba(26,28,38,0.98); backdrop-filter: blur(20px);
+            padding: 16px 24px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+            border-bottom: 1px solid rgba(88,166,255,0.2); box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+        }
+        .title { font-weight: 500; font-size: 20px; background: linear-gradient(135deg, #58a6ff, #79c0df); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        button { padding: 12px 20px; background: linear-gradient(135deg, #238636, #2ea043); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit; transition: all 0.25s; box-shadow: 0 4px 18px rgba(35,134,54,0.3); min-height: 48px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(35,134,54,0.4); }
+        button.active { background: linear-gradient(135deg, #58a6ff, #79c0ff); }
+        .secondary { background: linear-gradient(135deg, #6e40c9, #8b5cf6); }
+        .files-btn { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        input[type="text"] { padding: 12px 16px; background: rgba(13,17,23,0.9); color: #c9d1d9; border: 1px solid rgba(88,166,255,0.3); border-radius: 10px; font-family: inherit; min-height: 48px; flex: 1; max-width: 200px; }
+        .container { display: flex; flex-direction: column; height: calc(100vh - 100px); }
+        .main-panels { flex: 1; display: flex; }
+        .editor-panel { width: 60%; position: relative; }
+        .side-panel { width: 40%; display: flex; flex-direction: column; border-left: 1px solid rgba(88,166,255,0.15); }
+        #editor { width: 100%; height: 100%; background: rgba(13,17,23,0.98); color: #c9d1d9; border: none; padding: 28px; font-size: 16px; line-height: 1.7; resize: none; font-family: 'Fira Code', monospace; caret-color: #58a6ff; outline: none; }
+        .tab-buttons { display: flex; background: rgba(26,28,38,0.9); border-bottom: 1px solid rgba(88,166,255,0.1); }
+        .tab-btn { flex: 1; padding: 14px; background: none; border: none; color: #8b949e; cursor: pointer; font-family: inherit; font-size: 14px; transition: all 0.2s; }
+        .tab-btn.active { color: #58a6ff; background: rgba(88,166,255,0.1); border-bottom: 3px solid #58a6ff; }
+        .tab-content { flex: 1; overflow: auto; }
+        .tab-content.active { display: block; }
+        .tab-content:not(.active) { display: none; }
+        #variables { padding: 24px; font-size: 15px; }
+        .var-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(88,166,255,0.1); }
+        .var-name { font-weight: 500; color: #58a6ff; min-width: 60px; }
+        .var-value { color: #79c0df; font-family: monospace; }
+        #logs { padding: 24px; background: rgba(22,27,34,0.98); font-size: 14px; line-height: 1.6; }
+        .log-entry { margin: 4px 0; padding: 6px 8px; background: rgba(88,166,255,0.05); border-left: 3px solid #58a6ff; border-radius: 0 4px 4px 0; }
+        .files-list { padding: 24px; }
+        .file-item { display: flex; align-items: center; padding: 12px; background: rgba(88,166,255,0.05); margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .file-item:hover { background: rgba(88,166,255,0.15); }
+        .file-item.active { background: linear-gradient(135deg, #58a6ff, #79c0df); color: white; }
+        .file-name { font-weight: 500; margin-right: 12px; flex: 1; }
+        .file-delete { background: #f85149; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .bottom-panel { border-top: 1px solid rgba(88,166,255,0.15); height: 240px; display: flex; flex-direction: column; background: rgba(26,28,38,0.95); }
+        #console { flex: 1; padding: 20px; overflow-y: auto; font-size: 14px; background: rgba(22,27,34,0.98); }
+        .console-input { display: flex; gap: 12px; padding-top: 12px; border-top: 1px solid rgba(88,166,255,0.1); }
+        #consoleInput { flex: 1; padding: 12px; background: rgba(13,17,23,0.9); color: #c9d1d9; border: 1px solid rgba(88,166,255,0.3); border-radius: 8px; font-family: inherit; }
+        .statusbar { padding: 12px 24px; font-size: 13px; display: flex; justify-content: space-between; background: rgba(13,17,23,0.95); border-top: 1px solid rgba(88,166,255,0.1); }
+        .success { color: #238636 !important; font-weight: 500; }
+        .error { color: #f85149 !important; font-weight: 500; }
+    </style>
 </head>
 <body>
-
     <div class="topbar">
         <span class="title">⚡ Java Pro IDE</span>
-        <button id="runBtn">▶ Execute</button>
-        <button class="secondary" id="formatBtn">𝐀 Format</button>
-        <button id="clearBtn">🗑 Clear All</button>
+        <button onclick="runCode()" id="runBtn">▶ Execute</button>
+        <button class="secondary" onclick="formatCode()">𝐀 Format</button>
+        <button class="files-btn" onclick="showFilesTab()">📁 Files</button>
+        <button onclick="addFile()">➕ New File</button>
+        <button onclick="clearAll()">🗑 Clear All</button>
         <button class="secondary" id="autoBtn">🧠 Auto: ON</button>
     </div>
-
+    
     <div class="container">
         <div class="main-panels">
             <div class="editor-panel">
-                <textarea id="editor" spellcheck="false" autocorrect="off" autocomplete="off"></textarea>
+                <textarea id="editor" spellcheck="false" autocorrect="off" autocomplete="off">// INTERACTIVE CONSOLE + FILES!
+// Try Scanner input:
+import java.util.Scanner;
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter a number: ");
+        int num = sc.nextInt();
+        System.out.println("You entered: " + num);
+        System.out.println("Double: " + (num * 2));
+    }
+}</textarea>
             </div>
-
+            
             <div class="side-panel">
                 <div class="tab-buttons">
-                    <button class="tab-btn active" data-tab="variables">📊 Variables</button>
-                    <button class="tab-btn" data-tab="logs">📝 Logs</button>
+                    <button class="tab-btn active" onclick="switchTab('variables')">📊 Variables</button>
+                    <button class="tab-btn" onclick="switchTab('logs')">📝 Logs</button>
+                    <button class="tab-btn" onclick="switchTab('files')">📁 Files</button>
                 </div>
                 <div id="variables" class="tab-content active">
-                    <div class="placeholder">Execute to see real-time values →</div>
+                    <div style="font-size: 14px; color: #8b949e; margin-bottom: 20px;">
+                        <strong>Live Variables</strong>
+                    </div>
                 </div>
                 <div id="logs" class="tab-content">
-                    <div class="placeholder">Execution logs appear here step-by-step...</div>
+                    <div style="color: #8b949e;">Execution logs...</div>
+                </div>
+                <div id="files" class="tab-content">
+                    <div class="files-list">
+                        <div class="file-item active" onclick="switchFile(0)">
+                            <span class="file-name">Main.java</span>
+                            <button class="file-delete" onclick="deleteFile(0); event.stopPropagation()">×</button>
+                        </div>
+                    </div>
+                    <div style="padding: 16px; border-top: 1px solid rgba(88,166,255,0.1);">
+                        <input type="text" id="newFileName" placeholder="New file name..." />
+                        <button onclick="addFile()" style="margin-top: 8px; width: 100%;">Create</button>
+                    </div>
                 </div>
             </div>
         </div>
-
+        
         <div class="bottom-panel">
-            <div id="console">✨ Java simulation ready! Try some code 🚀</div>
+            <div id="console">✨ Type in console below 👇<br>Supports Scanner.nextInt(), nextLine(), etc!</div>
+            <div class="console-input">
+                <input type="text" id="consoleInput" placeholder="Type input here (Enter to send)..." />
+                <button onclick="sendInput()">Send</button>
+            </div>
             <div class="statusbar">
-                <span id="status">Ln 1, Col 1 | Pro IDE</span>
+                <span id="status">Ln 1, Col 1 | File: Main.java</span>
                 <span id="info">Ready</span>
             </div>
         </div>
     </div>
 
-    <script src="js/editor.js"></script>
-    <script src="js/simulator.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <script>
+        const editor = document.getElementById('editor');
+        const consoleDiv = document.getElementById('console');
+        const consoleInput = document.getElementById('consoleInput');
+        const status = document.getElementById('status');
+        const variablesDiv = document.getElementById('variables');
+        const logsDiv = document.getElementById('logs');
+        const filesDiv = document.getElementById('files');
+        const autoBtn = document.getElementById('autoBtn');
+        const runBtn = document.getElementById('runBtn');
+        
+        let files = [{ name: "Main.java", content: editor.value }];
+        let currentFileIndex = 0;
+        let consoleInputs = [];
+        let variables = {};
+        let logEntries = [];
+        let isAutoCompleteOn = true;
+        let currentTab = 'variables';
+        let waitingForInput = false;
 
+        // File management
+        function addFile() {
+            const name = document.getElementById('newFileName').value.trim() || `File${files.length + 1}.java`;
+            files.push({ name, content: '// New Java file\npublic class ' + name.replace('.java', '') + ' {\n    public static void main(String[] args) {\n        System.out.println("Hello from ' + name + '!");\n    }\n}' });
+            switchFile(files.length - 1);
+            updateFilesTab();
+            document.getElementById('newFileName').value = '';
+        }
+
+        function switchFile(index) {
+            currentFileIndex = index;
+            editor.value = files[index].content;
+            updateStatus();
+            updateFilesTab();
+        }
+
+        function deleteFile(index) {
+            if (files.length === 1) return;
+            files.splice(index, 1);
+            if (currentFileIndex >= files.length) currentFileIndex = 0;
+            switchFile(currentFileIndex);
+        }
+
+        function updateFilesTab() {
+            const list = filesDiv.querySelector('.files-list');
+            list.innerHTML = '';
+            files.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = `file-item ${index === currentFileIndex ? 'active' : ''}`;
+                item.onclick = () => switchFile(index);
+                item.innerHTML = `
+                    <span class="file-name">${file.name}</span>
+                    <button class="file-delete" onclick="deleteFile(${index}); event.stopPropagation()">×</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function showFilesTab() {
+            switchTab('files');
+        }
+
+        // Tab switching
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+        }
+
+        // Console input
+        consoleInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendInput();
+        });
+
+        function sendInput() {
+            const input = consoleInput.value.trim();
+            if (input) {
+                consoleInputs.push(input);
+                consoleDiv.innerHTML += `<div style="color: #79c0df;">> ${input}</div>`;
+                consoleInput.value = '';
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            }
+        }
+
+        // Auto-complete (unchanged)
+        editor.addEventListener('keydown', (e) => {
+            if (!isAutoCompleteOn || e.ctrlKey) return;
+            const start = editor.selectionStart;
+            const textAfter = editor.value.slice(editor.selectionEnd);
+            const pairs = { '(': ')', '{': '}', '[': ']', '"': '"', "'": "'" };
+            
+            if (pairs[e.key] && !textAfter.startsWith(pairs[e.key])) {
+                e.preventDefault();
+                const pair = e.key + pairs[e.key];
+                editor.value = editor.value.slice(0, start) + pair + editor.value.slice(editor.selectionEnd);
+                editor.setSelectionRange(start + 1, start + 1);
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = editor.selectionStart;
+                editor.value = editor.value.slice(0, start) + '    ' + editor.value.slice(editor.selectionEnd);
+                editor.setSelectionRange(start + 4, start + 4);
+            }
+        });
+
+        function toggleAutoComplete() {
+            isAutoCompleteOn = !isAutoCompleteOn;
+            autoBtn.textContent = `🧠 Auto: ${isAutoCompleteOn ? 'ON' : 'OFF'}`;
+            autoBtn.className = isAutoCompleteOn ? 'secondary' : '';
+        }
+
+        editor.addEventListener('input', updateStatus);
+        function updateStatus() {
+            const pos = editor.selectionStart;
+            const lines = editor.value.slice(0, pos).split('\n');
+            status.textContent = `Ln ${lines.length}, Col ${lines[lines.length-1].length + 1} | ${files[currentFileIndex]?.name || 'Untitled.java'}`;
+        }
+
+        // 🔥 ENHANCED EXECUTION w/ CONSOLE INPUT
+        function runCode() {
+            runBtn.classList.add('active');
+            consoleDiv.innerHTML = '<span class="success">🔄 Executing...</span>';
+            consoleInputs = [];
+            variables = {};
+            logEntries = [];
+            
+            setTimeout(() => {
+                try {
+                    const code = editor.value;
+                    addLog("Parsing variables...");
+                    
+                    // Parse variables (FIXED)
+                    const varRegex = /(\bint\b|\bdouble\b|\bfloat\b)\s+(\w+)\s*=\s*([^;]+)/g;
+                    let match;
+                    while ((match = varRegex.exec(code)) !== null) {
+                        const type = match[1];
+                        const name = match[2];
+                        let value = match[3].trim();
+                        
+                        // Handle console input for Scanner
+                        if (value.includes('sc.next')) {
+                            value = consoleInputs[0] || '0';
+                            consoleInputs.shift();
+                        }
+                        
+                        const numValue = parseFloat(value.match(/[-+]?\d*\.?\d+/)?.[0]) || 0;
+                        variables[name] = type === 'int' ? Math.floor(numValue) : numValue;
+                        addLog(`📦 ${name} = ${variables[name]}`);
+                    }
+                    
+                    // Execute prints
+                    const printRegex = /System\.out\.(println|print)\s*\(\s*([^)]+)\s*\)/g;
+                    let printMatch;
+                    let output = '';
+                    
+                    while ((printMatch = printRegex.exec(code)) !== null) {
+                        let expr = printMatch[2].trim();
+                        
+                        // Replace variables
+                        Object.entries(variables).forEach(([name, value]) => {
+                            expr = expr.replace(new RegExp(`\\b${name}\\b`, 'g'), value);
+                        });
+                        
+                        let result = expr.match(/^".*"$/)? expr.slice(1,-1) : 
+                                   eval(expr.replace(/[^\d+\-*/().]/g, '')) || 0;
+                        
+                        output += result + (printMatch[1] === 'println' ? '\n' : '');
+                        addLog(`🖨️ "${expr}" → ${result}`);
+                    }
+                    
+                    updateVariablesTab();
+                    consoleDiv.innerHTML = `<span class="success">✅ Complete!</span><br><pre style="margin-top:12px;">${output}</pre>`;
+                    
+                } catch (error) {
+                    consoleDiv.innerHTML = `<span class="error">❌ ${error.message}</span>`;
+                }
+                
+                runBtn.classList.remove('active');
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            }, 200);
+        }
+
+        function updateVariablesTab() {
+            variablesDiv.innerHTML = `<div style="font-size: 14px; color: #8b949e; margin-bottom: 20px;">
+                <strong>${Object.keys(variables).length} Variables</strong></div>`;
+            Object.entries(variables).forEach(([name, value]) => {
+                const row = document.createElement('div');
+                row.className = 'var-row';
+                row.innerHTML = `<span class="var-name">${name}</span><span class="var-value">${value}</span>`;
+                variablesDiv.appendChild(row);
+            });
+        }
+
+        function addLog(message) {
+            logEntries.push(`${new Date().toLocaleTimeString()}: ${message}`);
+            if (currentTab === 'logs') {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = logEntries[logEntries.length - 1];
+                logsDiv.appendChild(entry);
+            }
+        }
+
+        function formatCode() {
+            const lines = editor.value.split('\n').map(line => line.replace(/^ {2,}/g, m => '  '.repeat(Math.floor(m.length/4))));
+            editor.value = lines.join('\n');
+            files[currentFileIndex].content = editor.value;
+            updateStatus();
+        }
+
+        function clearAll() {
+            consoleDiv.innerHTML = '';
+            variablesDiv.innerHTML = '<div style="color: #8b949e;">Cleared!</div>';
+            logsDiv.innerHTML = '<div style="color: #8b949e;">Cleared</div>';
+            variables = {};
+        }
+
+        // Init
+        updateFilesTab();
+        updateStatus();
+        toggleAutoComplete();
+    </script>
 </body>
 </html>
+
