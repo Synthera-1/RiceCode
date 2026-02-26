@@ -1,23 +1,31 @@
-// editor.js - editor behavior, auto-complete, status
+// editor.js - Auto-complete, status bar updates
 
 const editor = document.getElementById('editor');
-let isAutoCompleteOn = true;
 
-editor.addEventListener('keydown', e => {
-    if (!isAutoCompleteOn) return;
-    if (e.ctrlKey || e.metaKey) return;
+if (editor) {
+    editor.addEventListener('keydown', e => {
+        if (!isAutoCompleteOn) return;
+        if (e.ctrlKey || e.metaKey) return;
 
-    const start = editor.selectionStart;
-    const after = editor.value.slice(editor.selectionEnd);
+        const start = editor.selectionStart;
+        const after = editor.value.slice(editor.selectionEnd);
 
-    switch (e.key) {
-        case '(': if (!after.startsWith(')')) { e.preventDefault(); insertPair('()', 1); } break;
-        case '{': if (!after.startsWith('}')) { e.preventDefault(); insertPair('{}', 1); } break;
-        case '[': if (!after.startsWith(']')) { e.preventDefault(); insertPair('[]', 1); } break;
-        case '"': if (!after.startsWith('"')) { e.preventDefault(); insertPair('""', 1); } break;
-        case 'Tab': e.preventDefault(); insertText('    '); break;
-    }
-});
+        switch (e.key) {
+            case '(': if (!after.startsWith(')')) { e.preventDefault(); insertPair('()', 1); } break;
+            case '{': if (!after.startsWith('}')) { e.preventDefault(); insertPair('{}', 1); } break;
+            case '[': if (!after.startsWith(']')) { e.preventDefault(); insertPair('[]', 1); } break;
+            case '"': if (!after.startsWith('"')) { e.preventDefault(); insertPair('""', 1); } break;
+            case 'Tab':
+                e.preventDefault();
+                insertText('    ');
+                break;
+        }
+    });
+
+    editor.addEventListener('input', updateEditorStatus);
+    editor.addEventListener('mouseup', updateEditorStatus);
+    editor.addEventListener('keyup', updateEditorStatus);
+}
 
 function insertPair(pair, pos) {
     const start = editor.selectionStart;
@@ -33,14 +41,13 @@ function insertText(text) {
     editor.dispatchEvent(new Event('input'));
 }
 
-editor.addEventListener('input', updateStatus);
-editor.addEventListener('mouseup', updateStatus);
-editor.addEventListener('keyup', updateStatus);
-
-function updateStatus() {
+function updateEditorStatus() {
     const pos = editor.selectionStart;
     const lines = editor.value.slice(0, pos).split('\n');
     const line = lines.length;
     const col = lines[lines.length - 1].length + 1;
-    document.getElementById('status').textContent = `Ln ${line}, Col ${col} | Pro IDE`;
+    const statusEl = document.getElementById('status');
+    if (statusEl) {
+        statusEl.textContent = `Ln ${line}, Col ${col} | Pro IDE`;
+    }
 }
