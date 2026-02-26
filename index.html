@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Root-relative path with repo name – should fix loading on GitHub Pages -->
-    <link rel="stylesheet" href="/RiceCode/css/styles.css">
+    <!-- Try simple relative path first – most reliable in subfolder deploys -->
+    <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
 
@@ -48,37 +48,7 @@
             <div id="updates" class="tab-content">
                 <div class="changelog-container">
                     <h2>Release Notes</h2>
-
-                    <div class="release">
-                        <h3>v1.4 – Professional Edition</h3>
-                        <time>February 2026</time>
-                        <ul>
-                            <li>Modern, clean UI with professional typography & spacing</li>
-                            <li>Multiple file support with rename/delete</li>
-                            <li>Interactive console with real-time input (Scanner simulation)</li>
-                            <li>Improved code formatting & error feedback</li>
-                            <li>Consistent design system & subtle animations</li>
-                        </ul>
-                    </div>
-
-                    <div class="release">
-                        <h3>v1.3 – File Management & Input</h3>
-                        <time>February 2026</time>
-                        <ul>
-                            <li>Tab-based file switching</li>
-                            <li>Basic Scanner.next*() support with user input</li>
-                        </ul>
-                    </div>
-
-                    <div class="release">
-                        <h3>v1.0 – Initial Release</h3>
-                        <time>February 2026</time>
-                        <ul>
-                            <li>Variable tracking & expression evaluation</li>
-                            <li>Live variables panel</li>
-                            <li>Basic console output</li>
-                        </ul>
-                    </div>
+                    <p>(Changelog content here – currently static)</p>
                 </div>
             </div>
         </div>
@@ -98,11 +68,29 @@
     </div>
 </div>
 
-<!-- Root-relative paths with repo name -->
-<script src="/RiceCode/js/editor.js"></script>
-<script src="/RiceCode/js/simulator.js"></script>
-<script src="/RiceCode/js/ui.js"></script>
-<script src="/RiceCode/js/main.js"></script>
+<!-- Simple relative paths – should work on GitHub Pages subfolder -->
+<script src="./js/editor.js"></script>
+<script src="./js/simulator.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/main.js"></script>
+
+<!-- Tiny debug script – shows alert if main.js loaded successfully -->
+<script>
+  window.addEventListener('load', () => {
+    if (typeof runCode === 'function') {
+      console.log("main.js seems to have loaded OK – runCode exists");
+    } else {
+      alert("JavaScript problem: runCode function is missing.\nCheck console (F12) for errors.");
+    }
+
+    // Quick manual test – click anywhere on page logs something
+    document.body.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        console.log("Button clicked:", e.target.id);
+      }
+    });
+  });
+</script>
 
 </body>
 </html>
